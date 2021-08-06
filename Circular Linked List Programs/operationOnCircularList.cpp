@@ -7,39 +7,36 @@ class Node
 public:
     int key;
     int data;
-    Node *prevNode;
-    Node *nextNode;
+    Node *next;
 
     Node()
     {
+
         key = 0;
         data = 0;
-        prevNode = NULL;
-        nextNode = NULL;
+        next = NULL;
     }
 
-    Node(int value, int k)
+    Node(int d, int k)
     {
-        data = value;
+        data = d;
         key = k;
     }
 };
 
-class DoublyLinkedList
+class CircularLinkedList
 {
 
 public:
-    // Pointer of class Node -> head
     Node *head;
 
-    DoublyLinkedList()
+    CircularLinkedList()
     {
         head = NULL;
     }
 
-    DoublyLinkedList(Node *n)
+    CircularLinkedList(Node *n)
     {
-
         head = n;
     }
 
@@ -52,16 +49,24 @@ public:
         Node *temp = NULL;
         Node *ptr = head;
 
-        while (ptr != NULL)
+        if (head == NULL)
         {
-            if (ptr->key == key)
-            {
-                temp = ptr;
-            }
-            ptr = ptr->nextNode;
+            return temp;
         }
+        else
+        {
 
-        return temp;
+            do
+            {
+                if (ptr->key == key)
+                {
+                    temp = ptr;
+                }
+                ptr = ptr->next;
+            } while (ptr != head);
+
+            return temp;
+        }
     }
 
     //2 Append the data into the end of the list
@@ -80,18 +85,19 @@ public:
             {
 
                 head = n;
+                n->next = head;
                 cout << "Node is Appended as Head Node" << endl;
             }
             else
             {
                 Node *ptr = head;
-                while (ptr->nextNode != NULL)
+                while (ptr->next != NULL)
                 {
-                    ptr = ptr->nextNode;
+                    ptr = ptr->next;
                 }
 
-                ptr->nextNode = n;
-                n->prevNode = ptr;
+                ptr->next = n;
+                n->next = ptr;
                 cout << "Node is Appended" << endl;
             }
         }
@@ -104,14 +110,23 @@ public:
         {
             cout << "Node is already Exits" << n->key << endl;
         }
-        else if(head == NULL){
+        else if (head == NULL)
+        {
+
             head = n;
-            cout<<"Nod eis appende as Head Node..."<<endl;
+            n->next = head;
+            cout << "Node is Appended as Head Node" << endl;
         }
         else
         {
-            head->prevNode = n;
-            n->nextNode = head;
+            Node *ptr = head;
+            while (ptr != head)
+            {
+                ptr = ptr->next;
+            }
+
+            ptr->next = n;
+            n->next = head;
             head = n;
             cout << "Node is added to the beginning" << endl;
         }
@@ -139,14 +154,12 @@ public:
 
                 cout << "Inserting the Node..." << endl;
 
-                Node *newNode = ptr->nextNode;
-
                 // appendin the Ndee at the End
-                if (newNode == NULL)
+                if (ptr->next == head)
                 {
 
-                    ptr->nextNode = n;
-                    n->prevNode = ptr;
+                    n->next = head;
+                    ptr->next = n;
                     cout << "Node Instred at the End..." << endl;
                 }
 
@@ -154,12 +167,10 @@ public:
                 else
                 {
 
-                    n->nextNode = newNode;
-                    newNode->prevNode = n;
-                    n->prevNode = ptr;
-                    ptr->nextNode = n;
+                    n->next = ptr->next;
+                    ptr->next = n;
 
-                    cout << "Node is Instred.." << endl;
+                    cout << "Node is Instred..In Between" << endl;
                 }
             }
         }
@@ -171,35 +182,62 @@ public:
 
         Node *ptr = nodeExits(key);
 
-        if (head == NULL)
+        if (ptr == NULL)
         {
-            cout << "Singly Linked list is Empty" << endl;
+
+            cout << "No NOde is existed withthe kay value..." << key;
         }
-        else if (head != NULL)
+
+        else
         {
-            if (head->key == key)
+
+            if (ptr == head)
             {
-                head = head->nextNode;
-                cout << "Node is unlinked with key value of " << key << endl;
+                cout << "Singly Linked list is Empty" << endl;
             }
-            else
+            else if (ptr == head)
             {
-
-                Node *prevNode = head->prevNode;
-                Node *nextNodeNode = head->nextNode;
-
-                if (nextNodeNode == NULL)
+                if (head->next == NULL)
                 {
-                    prevNode->nextNode = NULL;
-                    cout << "Node deleted at the end.." << endl;
+                    head = NULL;
+                    cout << "Head Node is unlinked  " << key << endl;
                 }
                 else
                 {
 
-                    prevNode->nextNode = nextNodeNode;
-                    nextNodeNode->prevNode = prevNode;
+                    Node *node = head;
+                    while (node->next != head)
+                    {
+                        node = node->next;
+                    }
+                    node->next = head->next;
+                    head = head->next;
                     cout << "Node Deleted..." << endl;
                 }
+            }
+            else
+            {
+                Node *temp = NULL;
+                Node *prevptr = head;
+                Node *curptr = head->next;
+
+                while (curptr != NULL)
+                {
+                    if (curptr->key == key)
+                    {
+                        temp = curptr;
+                        curptr = NULL;
+                    }
+                    else
+                    {
+
+                        prevptr->next = prevptr->next;
+                        curptr = curptr->next;
+                    }
+                }
+
+                prevptr->next = temp->next;
+                cout << "NOde unlinked with the key value..." << key << endl;
             }
         }
     }
@@ -222,6 +260,7 @@ public:
             cout << "Node data  is not update sucsessfully..." << endl;
         }
     }
+
     // case 7:  Travesal
     void traversal()
     {
@@ -233,15 +272,16 @@ public:
 
         else
         {
-
-            cout << endl<< "Doubly Linked List Values : " << endl;
+            cout<<"Head Adress"<<head<<endl;
+            cout << endl
+                 << "Doubly Linked List Values : " << endl;
             Node *temp = head;
 
-            while (temp != NULL)
+           do
             {
-                cout << "(" << temp->key << temp->data << ") -->";
-                temp = temp->nextNode;
-            }
+                cout << "( key : " << temp->key<< ", data : " << temp->data << ") -->";
+                temp = temp->next;
+            } while (temp != head);
         }
     }
 };
@@ -249,7 +289,7 @@ public:
 int main()
 {
 
-    DoublyLinkedList d;
+    CircularLinkedList c;
     int option;
     int key, data, prevKey;
 
@@ -278,7 +318,7 @@ int main()
             cin >> data;
             node->key = key;
             node->data = data;
-            d.appendNode(node);
+            c.appendNode(node);
             break;
 
         case 2:
@@ -287,7 +327,7 @@ int main()
             cin >> data;
             node->key = key;
             node->data = data;
-            d.prePendNode(node);
+            c.prePendNode(node);
             break;
 
         case 3:
@@ -298,25 +338,25 @@ int main()
             cin >> data;
             node->key = key;
             node->data = data;
-            d.insertNodeAfter(node, prevKey);
+            c.insertNodeAfter(node, prevKey);
             break;
 
         case 4:
             cout << "Enter the key to Delete the Node : " << endl;
             cin >> prevKey;
-            d.deletNodeByKey(prevKey);
+            c.deletNodeByKey(prevKey);
             break;
 
         case 5:
             cout << "Enter the key and  NEW data to update the Node : " << endl;
             cin >> key;
             cin >> data;
-            d.updateNodeByKey(key, data);
+            c.updateNodeByKey(key, data);
             break;
 
         case 6:
             cout << "Print the List : " << endl;
-            d.traversal();
+            c.traversal();
             break;
 
         case 7:
